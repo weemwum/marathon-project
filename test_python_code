@@ -1,0 +1,58 @@
+#initializes firestore database
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+cred = credentials.Certificate('D:/Henry/Documents/firebase/test2-21039-firebase-adminsdk-18xm6-cf85c3d3dc.json')
+default_app = firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+
+#pulls berlin data, saves as "response"
+import requests
+url = "https://www.bmw-berlin-marathon.com/?eID=tx_scctiming_results&competition=38&draw=1&columns%5B0%5D%5Bdata%5D=&columns%5B0%5D%5Bname%5D=details-control&columns%5B0%5D%5Bsearchable%5D=false&columns%5B0%5D%5Borderable%5D=false&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B1%5D%5Bdata%5D=placetotal&columns%5B1%5D%5Bname%5D=field-placetotal&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true&columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=forename&columns%5B2%5D%5Bname%5D=field-forename&columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B3%5D%5Bdata%5D=name&columns%5B3%5D%5Bname%5D=field-name&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true&columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B4%5D%5Bdata%5D=nationality&columns%5B4%5D%5Bname%5D=field-nationality&columns%5B4%5D%5Bsearchable%5D=true&columns%5B4%5D%5Borderable%5D=true&columns%5B4%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B4%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B5%5D%5Bdata%5D=start_no_text&columns%5B5%5D%5Bname%5D=field-start_no_text&columns%5B5%5D%5Bsearchable%5D=true&columns%5B5%5D%5Borderable%5D=true&columns%5B5%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B5%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B6%5D%5Bdata%5D=club&columns%5B6%5D%5Bname%5D=field-club&columns%5B6%5D%5Bsearchable%5D=true&columns%5B6%5D%5Borderable%5D=true&columns%5B6%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B6%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B7%5D%5Bdata%5D=sex&columns%5B7%5D%5Bname%5D=field-sex&columns%5B7%5D%5Bsearchable%5D=true&columns%5B7%5D%5Borderable%5D=true&columns%5B7%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B7%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B8%5D%5Bdata%5D=netto&columns%5B8%5D%5Bname%5D=field-netto&columns%5B8%5D%5Bsearchable%5D=true&columns%5B8%5D%5Borderable%5D=true&columns%5B8%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B8%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B9%5D%5Bdata%5D=brutto&columns%5B9%5D%5Bname%5D=field-brutto&columns%5B9%5D%5Bsearchable%5D=true&columns%5B9%5D%5Borderable%5D=true&columns%5B9%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B9%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B10%5D%5Bdata%5D=&columns%5B10%5D%5Bname%5D=photo&columns%5B10%5D%5Bsearchable%5D=false&columns%5B10%5D%5Borderable%5D=false&columns%5B10%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B10%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B11%5D%5Bdata%5D=&columns%5B11%5D%5Bname%5D=certificate&columns%5B11%5D%5Bsearchable%5D=false&columns%5B11%5D%5Borderable%5D=false&columns%5B11%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B11%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=8&order%5B0%5D%5Bdir%5D=asc&start=0&length=20&search%5Bvalue%5D=&search%5Bregex%5D=false&_=1562450890786"
+response = requests.get(url)
+
+
+#unpacks berlin data, saves to firestore database
+for item in response.json()['data']:
+    
+    #parse the splits
+    splits_that_i_want_str = item['splits']
+    mylist = splits_that_i_want_str.split(',')
+    #build split dictionary
+    splits_dict = {
+    '5k': mylist[0],
+    '10k' :mylist[1],
+    '15k': mylist[2],
+    '20k': mylist[3],
+    'Half': mylist[4],
+    '25k': mylist[5],
+    '30k': mylist[6],
+    '35k': mylist[7],
+    '40k': mylist[8],
+    }
+    
+    
+    #saves information at /races/berlin/2018
+    race_ref = db.collection(u'races').document(u'berlin').collection(u'2018')
+
+    race_ref.add({
+    u'first_name': item['forename'],
+    u'last_name': item['name'],
+    u'nationality': item['nationality'],
+    u'start_num': item['start_no_text'],
+    u'sex': item['sex'],
+    u'net_time': item['netto'],
+    u'gross_time': item['brutto'],
+    u'place' : item['placetotal'],
+    u'splits': splits_dict
+    })
+
+
+#HAVING ISSUES WITH Query.get() FUNCTION
+#query database
+docs = db.collection(u'races').where(u'first_name', u'==',u'Eluid')#.get()
+
+#for doc in docs:
+#    print(u'{} => {}'.format(doc.id,doc.to_dict()))
